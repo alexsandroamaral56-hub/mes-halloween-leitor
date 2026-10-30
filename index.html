@@ -4,55 +4,120 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MES Halloween Party - Leitor</title>
+<meta name="theme-color" content="#111111">
+<title>MES Halloween Party - Leitor Oficial</title>
 <script src="https://unpkg.com/html5-qrcode"></script>
+
 <style>
-*{box-sizing:border-box}
-body{
-  margin:0;padding:20px;
-  background:#111;color:#fff;
-  font-family:Arial,sans-serif;
-  text-align:center
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: 20px;
+  background: #111;
+  color: #fff;
+  font-family: Arial, sans-serif;
+  text-align: center;
 }
-.container{max-width:480px;margin:auto}
-h1{color:#ff8c00;font-size:27px;margin:12px 0}
-.sub{color:#ccc;margin-bottom:22px}
-.cards{display:flex;gap:12px;margin:20px 0}
-.card{
-  flex:1;background:#222;border:1px solid #444;
-  border-radius:12px;padding:17px 8px
+
+.container {
+  max-width: 480px;
+  margin: auto;
 }
-.number{font-size:34px;font-weight:bold;color:#ff8c00}
-.card small{color:#ddd}
-#reader{
-  width:100%;overflow:hidden;
-  border-radius:12px;background:#222;margin:18px auto
+
+h1 {
+  color: #ff8c00;
+  font-size: 27px;
+  margin: 12px 0;
 }
-button{
-  width:100%;padding:15px;margin:7px 0;
-  border:0;border-radius:9px;
-  background:#f97316;color:white;
-  font-size:16px;font-weight:bold
+
+.sub {
+  color: #ccc;
+  margin-bottom: 22px;
 }
-button.stop{background:#555}
-input{
-  width:100%;padding:15px;border-radius:9px;
-  border:1px solid #666;background:#222;color:white;
-  font-size:17px;text-transform:uppercase;
-  margin:8px 0
+
+.cards {
+  display: flex;
+  gap: 12px;
+  margin: 20px 0;
 }
-#resultado{
-  padding:18px;margin:16px 0;border-radius:12px;
-  background:#292929;font-size:19px;font-weight:bold
+
+.card {
+  flex: 1;
+  background: #222;
+  border: 1px solid #444;
+  border-radius: 12px;
+  padding: 17px 8px;
 }
-.ok{background:#075c2d!important}
-.repeat{background:#762020!important}
-.invalid{background:#704700!important}
-.info{color:#bbb;font-size:13px;margin-top:18px}
+
+.number {
+  font-size: 34px;
+  font-weight: bold;
+  color: #ff8c00;
+}
+
+.card small { color: #ddd; }
+
+#reader {
+  width: 100%;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #222;
+  margin: 18px auto;
+}
+
+button {
+  width: 100%;
+  padding: 15px;
+  margin: 7px 0;
+  border: 0;
+  border-radius: 9px;
+  background: #f97316;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button.stop { background: #555; }
+
+input {
+  width: 100%;
+  padding: 15px;
+  border-radius: 9px;
+  border: 1px solid #666;
+  background: #222;
+  color: white;
+  font-size: 17px;
+  margin: 8px 0;
+  text-transform: uppercase;
+}
+
+#resultado {
+  padding: 18px;
+  margin: 16px 0;
+  border-radius: 12px;
+  background: #292929;
+  font-size: 19px;
+  font-weight: bold;
+  overflow-wrap: anywhere;
+}
+
+.ok { background: #075c2d !important; }
+.repeat { background: #762020 !important; }
+.invalid { background: #704700 !important; }
+
+.info {
+  color: #bbb;
+  font-size: 13px;
+  margin-top: 18px;
+}
 </style>
 </head>
+
 <body>
 <div class="container">
+
   <h1>🎃 MES HALLOWEEN PARTY</h1>
   <div class="sub">Leitor oficial de ingressos individuais</div>
 
@@ -61,6 +126,7 @@ input{
       <div class="number" id="usados">—</div>
       <small>Utilizados</small>
     </div>
+
     <div class="card">
       <div class="number" id="disponiveis">—</div>
       <small>Disponíveis</small>
@@ -71,47 +137,85 @@ input{
 
   <div id="reader"></div>
 
-  <button onclick="iniciarCamera()">📷 Iniciar câmera</button>
-  <button class="stop" onclick="pararCamera()">Parar câmera</button>
+  <button id="btnIniciar" onclick="iniciarCamera()">
+    📷 Iniciar câmera
+  </button>
+
+  <button class="stop" onclick="pararCamera()">
+    Parar câmera
+  </button>
 
   <hr style="border-color:#444;margin:24px 0">
 
-  <input id="codigo" placeholder="MES-HW26-001">
-  <button onclick="validarManual()">Validar ingresso</button>
+  <input
+    id="codigo"
+    placeholder="MES-HW26-001"
+    autocomplete="off"
+  >
+
+  <button onclick="validarManual()">
+    Validar ingresso
+  </button>
 
   <div class="info">
     Primeira leitura libera a entrada.<br>
     Segunda leitura bloqueia.
   </div>
+
 </div>
 
 <script>
-const API = "COLE_AQUI_O_ENDERECO_EXEC_DO_APPS_SCRIPT";
+const API = "https://script.google.com/macros/s/AKfycbyX0YpvhZaOj1U6Zw-b6aDp2W_wDAhrKXYq53ADR7mLWSRi3hFtGUV_DjM5q-K1pBmT/exec";
 
 let leitor = null;
 let cameraAtiva = false;
 let processando = false;
 let ultimoScan = 0;
 
+function mostrar(texto, classe) {
+  const box = document.getElementById("resultado");
+  box.className = classe || "";
+  box.textContent = texto;
+}
+
 function chamarAPI(action, params, callback) {
-  const nome = "mesCallback" + Date.now() + Math.floor(Math.random()*1000);
+  const nome = "mesCallback" +
+    Date.now() +
+    Math.floor(Math.random() * 1000);
+
   const script = document.createElement("script");
+
   const query = new URLSearchParams({
     action: action,
     callback: nome,
     ...params
   });
 
-  window[nome] = function(data) {
-    callback(data);
+  let concluido = false;
+
+  function finalizar() {
     delete window[nome];
     script.remove();
+  }
+
+  window[nome] = function(data) {
+    if (concluido) return;
+    concluido = true;
+    finalizar();
+    callback(data);
   };
 
   script.onerror = function() {
-    delete window[nome];
-    script.remove();
-    mostrar("Falha de comunicação. Verifique a internet.", "invalid");
+    if (concluido) return;
+    concluido = true;
+    finalizar();
+
+    mostrar(
+      "Falha de comunicação com a planilha. Verifique a conexão e a implantação.",
+      "invalid"
+    );
+
+    processando = false;
   };
 
   script.src = API + "?" + query.toString();
@@ -120,15 +224,12 @@ function chamarAPI(action, params, callback) {
 
 function atualizarResumo() {
   chamarAPI("summary", {}, function(data) {
-    document.getElementById("usados").textContent = data.usados;
-    document.getElementById("disponiveis").textContent = data.disponiveis;
+    if (data.usados !== undefined) {
+      document.getElementById("usados").textContent = data.usados;
+      document.getElementById("disponiveis").textContent =
+        data.disponiveis;
+    }
   });
-}
-
-function mostrar(texto, classe) {
-  const box = document.getElementById("resultado");
-  box.className = classe || "";
-  box.textContent = texto;
 }
 
 function validarCodigo(codigo) {
@@ -144,24 +245,36 @@ function validarCodigo(codigo) {
   processando = true;
   mostrar("Verificando ingresso...", "");
 
-  chamarAPI("scan", {code: codigo}, function(data) {
+  chamarAPI("scan", { code: codigo }, function(data) {
+
     if (data.tipo === "VALIDO") {
-      mostrar("✅ ENTRADA LIBERADA! " + data.codigo +
-        " • " + data.quando, "ok");
+      mostrar(
+        "✅ ENTRADA LIBERADA! " +
+        data.codigo + " • Individual • " + data.quando,
+        "ok"
+      );
+
     } else if (data.tipo === "REPETIDO") {
-      mostrar("⛔ INGRESSO JÁ UTILIZADO! " + data.codigo +
-        " • " + data.quando, "repeat");
+      mostrar(
+        "⛔ INGRESSO JÁ UTILIZADO! " +
+        data.codigo + " • " + data.quando,
+        "repeat"
+      );
+
     } else {
-      mostrar("❌ " + (data.mensagem || "Ingresso inválido"),
-        "invalid");
+      mostrar(
+        "❌ " + (data.mensagem || "Ingresso inválido"),
+        "invalid"
+      );
     }
 
-    atualizarResumo();
     document.getElementById("codigo").value = "";
+    atualizarResumo();
 
     setTimeout(function() {
       processando = false;
     }, 1500);
+
   });
 }
 
@@ -173,12 +286,27 @@ async function iniciarCamera() {
   if (cameraAtiva) return;
 
   if (!window.isSecureContext) {
-    mostrar("Abra o leitor pelo endereço HTTPS do GitHub Pages.", "invalid");
+    mostrar(
+      "Acesse o leitor pelo endereço HTTPS do GitHub Pages.",
+      "invalid"
+    );
     return;
   }
 
-  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    mostrar("Este navegador não permite acesso à câmera.", "invalid");
+  if (!navigator.mediaDevices ||
+      !navigator.mediaDevices.getUserMedia) {
+    mostrar(
+      "Seu navegador não disponibilizou o acesso à câmera.",
+      "invalid"
+    );
+    return;
+  }
+
+  if (typeof Html5Qrcode === "undefined") {
+    mostrar(
+      "Não foi possível carregar o leitor de QR Code. Verifique a internet.",
+      "invalid"
+    );
     return;
   }
 
@@ -187,20 +315,38 @@ async function iniciarCamera() {
 
     await leitor.start(
       { facingMode: "environment" },
-      { fps: 10, qrbox: { width: 240, height: 180 } },
+      {
+        fps: 10,
+        qrbox: { width: 240, height: 180 }
+      },
+
       function(texto) {
         const agora = Date.now();
-        if (processando || agora - ultimoScan < 1800) return;
+
+        if (processando || agora - ultimoScan < 1800) {
+          return;
+        }
+
         ultimoScan = agora;
         validarCodigo(texto);
       },
+
       function() {}
     );
 
     cameraAtiva = true;
-    mostrar("📷 Câmera ativa. Aponte para o QR Code.", "");
+
+    mostrar(
+      "📷 Câmera ativa. Aponte para o QR Code.",
+      ""
+    );
+
   } catch (erro) {
-    mostrar("Não foi possível abrir a câmera: " + erro, "invalid");
+    mostrar(
+      "Não foi possível abrir a câmera: " + erro,
+      "invalid"
+    );
+
     leitor = null;
     cameraAtiva = false;
   }
@@ -212,14 +358,18 @@ async function pararCamera() {
   try {
     await leitor.stop();
     await leitor.clear();
-  } catch (erro) {}
+  } catch (erro) {
+    console.error(erro);
+  }
 
   leitor = null;
   cameraAtiva = false;
+
   mostrar("Câmera desligada.", "");
 }
 
 atualizarResumo();
 </script>
+
 </body>
 </html>
